@@ -5,7 +5,6 @@ namespace Movor\LaravelDbRedirector\Test;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Foundation\Application;
 use Movor\LaravelDbRedirector\Http\Middleware\DbRedirectorMiddleware;
-use Movor\LaravelDbRedirector\Models\RedirectRule;
 use Movor\LaravelDbRedirector\Providers\DbRedirectorServiceProvider;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use Route;
