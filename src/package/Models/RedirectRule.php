@@ -30,6 +30,8 @@ class RedirectRule extends Model
     /**
      * Update hits amount and last hit date
      * for the db redirect rule
+     *
+     * @return void
      */
     public function hit()
     {
