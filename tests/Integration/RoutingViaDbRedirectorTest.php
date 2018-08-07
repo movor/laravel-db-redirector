@@ -65,7 +65,7 @@ class RoutingViaDbRedirectorTest extends TestCase
             ->assertRedirect('/three/a/four/b/a-c');
     }
 
-    public function test_route_can_use_optional_parameters()
+    public function test_route_can_use_optional_parameters_as_wildcards()
     {
         RedirectRule::create([
             'origin' => '/five/{a?}/{b?}',

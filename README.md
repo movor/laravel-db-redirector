@@ -1,4 +1,4 @@
-# Manage HTTP redirections using database
+# Manage HTTP redirections in Laravel using database
 
 [![Build](https://travis-ci.org/movor/laravel-db-redirector.svg?branch=master)](https://travis-ci.org/movor/laravel-db-redirector)
 [![Downloads](https://poser.pugx.org/movor/laravel-db-redirector/downloads)](https://packagist.org/packages/movor/laravel-db-redirector)
@@ -29,7 +29,20 @@ The package needs to be registered in service providers:
 Movor\LaravelDbRedirector\Providers\DbRedirectorServiceProvider::class,
 ```
 
-Run migrations to create table which will hold out redirect rules:
+Database redirector middleware needs to be added to middleware array:
+
+```php
+// File: app/Http/Kernel.php
+
+// ...
+
+protected $middleware = [
+    // ...
+    \Movor\LaravelDbRedirector\Http\Middleware\DbRedirectorMiddleware::class
+];
+```
+
+Run migrations to create table which will store redirect rules:
 
 ```bash
 php artisan migrate
@@ -54,10 +67,6 @@ RedirectRule::create([
 You can also specify another redirection status code:
 
 ```php
-use Movor\LaravelDbRedirector\Models\RedirectRule;
-
-\\ ...
-
 RedirectRule::create([
     'origin' => 'foo/bar',
     'destination' => 'baz',
@@ -74,11 +83,14 @@ RedirectRule::create([
 ]);
 ```
 
-Optional parameters are also supported:
+Optional parameters can be used as a wildcards:
 
 ```php
+// If we visit: /foo or /foo/bar or /foo/bar/baz
+// we will end up at /test
+
 RedirectRule::create([
-    'origin' => 'foo/{param?}',
-    'destination' => 'bar/{param?}'
+    'origin' => 'foo/{param1?}/{param2?}',
+    'destination' => 'test'
 ]);
 ```

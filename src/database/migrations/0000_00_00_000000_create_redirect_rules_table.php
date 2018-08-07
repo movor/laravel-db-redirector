@@ -18,9 +18,7 @@ class CreateRedirectRulesTable extends Migration
             $table->string('origin', 256);
             $table->string('destination', 256);
             $table->unsignedSmallInteger('status_code')->default(301);
-            $table->unsignedInteger('hits')->default(0);
 
-            $table->timestamp('last_hit_at')->nullable();
             $table->timestamps();
 
             $table->unique(['origin']);
