@@ -81,4 +81,21 @@ class RoutingViaDbRedirectorTest extends TestCase
         $this->get('/five/a/b')
             ->assertRedirect('/six');
     }
+
+    public function test_router_can_redirect_more_than_once()
+    {
+        RedirectRule::create([
+            'origin' => '/x',
+            'destination' => '/y'
+        ]);
+
+        RedirectRule::create([
+            'origin' => '/y',
+            'destination' => '/z'
+        ]);
+
+        $this->followingRedirects()
+            ->get('/x')
+            ->assertRedirect('/z');
+    }
 }
