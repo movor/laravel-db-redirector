@@ -5,6 +5,10 @@
 [![Stable](https://poser.pugx.org/movor/laravel-db-redirector/v/stable)](https://packagist.org/packages/movor/laravel-db-redirector)
 [![License](https://poser.pugx.org/movor/laravel-db-redirector/license)](https://packagist.org/packages/movor/laravel-db-redirector)
 
+## Compatibility
+
+The package is compatible with Laravel versions 5.5.* and 5.6.*
+
 ## Installation
 
 Install the package via composer:
@@ -56,11 +60,11 @@ Default status code for redirections will be 301 (Moved Permanently).
 ```php
 use Movor\LaravelDbRedirector\Models\RedirectRule;
 
-\\ ...
+// ...
 
 RedirectRule::create([
-    'origin' => 'foo/bar',
-    'destination' => 'baz'
+    'origin' => 'one/two',
+    'destination' => 'three'
 ]);
 ```
 
@@ -68,29 +72,53 @@ You can also specify another redirection status code:
 
 ```php
 RedirectRule::create([
-    'origin' => 'foo/bar',
-    'destination' => 'baz',
+    'origin' => 'one/two',
+    'destination' => 'three',
     'status_code' => 307 // Temporary Redirect
 ]);
 ```
 
-You may use route parameters just like in native Laravel routes:
+You may use route parameters just like in native Laravel routes,
+they'll be passed down the road - from origin to destination:
 
 ```php
 RedirectRule::create([
-    'origin' => 'foo/{param}',
-    'destination' => 'bar/{param}'
+    'origin' => 'one/{param}',
+    'destination' => 'two/{param}'
 ]);
+
+// If we visit: "/one/foo" we will end up at "two/foo"
 ```
 
 Optional parameters can be used as a wildcards:
 
 ```php
-// If we visit: /foo or /foo/bar or /foo/bar/baz
-// we will end up at /test
+RedirectRule::create([
+    'origin' => 'one/{wildcard1?}/{wildcard?}',
+    'destination' => 'four'
+]);
+
+// If we visit: "/one" or "/one/two" or "/one/two/three"
+// we will end up at "/four"
+```
+
+Chained redirects will also work:
+
+```php
+RedirectRule::create([
+    'origin' => 'one',
+    'destination' => 'two'
+]);
 
 RedirectRule::create([
-    'origin' => 'foo/{param1?}/{param2?}',
-    'destination' => 'test'
+    'origin' => 'two',
+    'destination' => 'three'
 ]);
+
+RedirectRule::create([
+    'origin' => 'three',
+    'destination' => 'four'
+]);
+
+// If we visit: /one we'll end up at "/four"
 ```
