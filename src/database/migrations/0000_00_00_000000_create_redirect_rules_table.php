@@ -15,13 +15,11 @@ class CreateRedirectRulesTable extends Migration
     {
         Schema::create('redirect_rules', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('origin', 256);
-            $table->string('destination', 256);
+            $table->string('origin', 512)->unique();
+            $table->text('destination');
             $table->unsignedSmallInteger('status_code')->default(301);
 
             $table->timestamps();
-
-            $table->unique(['origin']);
         });
     }
 
