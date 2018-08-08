@@ -113,7 +113,7 @@ class RoutingViaDbRedirectorTest extends TestCase
         $this->get('one')
             ->assertRedirect('/two');
 
-        $this->get('two')
+        $this->get('three')
             ->assertRedirect('/four');
 
         RedirectRule::truncate();
