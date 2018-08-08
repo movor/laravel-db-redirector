@@ -120,5 +120,5 @@ RedirectRule::create([
     'destination' => 'four'
 ]);
 
-// If we visit: /one we'll end up at "/four"
+// If we visit: "/one" we'll end up at "/four"
 ```
