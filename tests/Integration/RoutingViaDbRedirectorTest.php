@@ -9,7 +9,7 @@ class RoutingViaDbRedirectorTest extends TestCase
 {
     public function test_simple_redirect()
     {
-        RedirectRule::create([
+        $redirectRule = RedirectRule::create([
             'origin' => '/one',
             'destination' => '/two'
         ]);
@@ -18,12 +18,12 @@ class RoutingViaDbRedirectorTest extends TestCase
             ->assertRedirect('/two')
             ->assertStatus(301);
 
-        RedirectRule::truncate();
+        $redirectRule->delete();
     }
 
     public function test_non_default_redirect_status_code()
     {
-        RedirectRule::create([
+        $redirectRule = RedirectRule::create([
             'origin' => '/one',
             'destination' => '/two',
             'status_code' => 302
@@ -33,12 +33,12 @@ class RoutingViaDbRedirectorTest extends TestCase
             ->assertRedirect('/two')
             ->assertStatus(302);
 
-        RedirectRule::truncate();
+        $redirectRule->delete();
     }
 
     public function test_route_can_use_single_named_param()
     {
-        RedirectRule::create([
+        $redirectRule = RedirectRule::create([
             'origin' => '/one/{a}/two',
             'destination' => '/three/{a}'
         ]);
@@ -46,12 +46,12 @@ class RoutingViaDbRedirectorTest extends TestCase
         $this->get('/one/a/two')
             ->assertRedirect('/three/a');
 
-        RedirectRule::truncate();
+        $redirectRule->delete();
     }
 
     public function test_route_can_use_multiple_named_params()
     {
-        RedirectRule::create([
+        $redirectRule = RedirectRule::create([
             'origin' => '/one/{a}/{b}/two/{c}',
             'destination' => '/{c}/{b}/{a}/three'
         ]);
@@ -59,12 +59,12 @@ class RoutingViaDbRedirectorTest extends TestCase
         $this->get('/one/a/b/two/c')
             ->assertRedirect('/c/b/a/three');
 
-        RedirectRule::truncate();
+        $redirectRule->delete();
     }
 
     public function test_route_can_use_multiple_named_params_in_one_segment()
     {
-        RedirectRule::create([
+        $redirectRule = RedirectRule::create([
             'origin' => '/one/two/{a}-{b}/{c}',
             'destination' => '/three/{a}/four/{b}/{a}-{c}'
         ]);
@@ -72,12 +72,12 @@ class RoutingViaDbRedirectorTest extends TestCase
         $this->get('/one/two/a-b/c')
             ->assertRedirect('/three/a/four/b/a-c');
 
-        RedirectRule::truncate();
+        $redirectRule->delete();
     }
 
     public function test_route_can_use_optional_parameters_as_wildcards()
     {
-        RedirectRule::create([
+        $redirectRule = RedirectRule::create([
             'origin' => '/one/{a?}/{b?}',
             'destination' => '/two'
         ]);
@@ -91,10 +91,10 @@ class RoutingViaDbRedirectorTest extends TestCase
         $this->get('/one/a/b')
             ->assertRedirect('/two');
 
-        RedirectRule::truncate();
+        $redirectRule->delete();
     }
 
-    public function test_router_can_redirect_more_than_once()
+    public function test_router_can_do_chained_redirects()
     {
         RedirectRule::create([
             'origin' => '/one',
@@ -102,19 +102,19 @@ class RoutingViaDbRedirectorTest extends TestCase
         ]);
 
         RedirectRule::create([
-            'origin' => '/three',
-            'destination' => '/four'
+            'origin' => '/two',
+            'destination' => '/three'
         ]);
 
         // TODO.IMPROVE
         // This is actually working but i'm not sure how to test
         // chained redirects. For now we'll test one by one.
 
-        $this->get('one')
+        $this->get('/one')
             ->assertRedirect('/two');
 
-        $this->get('three')
-            ->assertRedirect('/four');
+        $this->get('/two')
+            ->assertRedirect('/three');
 
         RedirectRule::truncate();
     }
