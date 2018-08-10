@@ -5,6 +5,8 @@
 [![Stable](https://poser.pugx.org/movor/laravel-db-redirector/v/stable)](https://packagist.org/packages/movor/laravel-db-redirector)
 [![License](https://poser.pugx.org/movor/laravel-db-redirector/license)](https://packagist.org/packages/movor/laravel-db-redirector)
 
+***
+
 ## Compatibility
 
 The package is compatible with Laravel versions 5.5.* and 5.6.*
@@ -121,4 +123,23 @@ RedirectRule::create([
 ]);
 
 // If we visit: "/one" we'll end up at "/four"
+```
+
+We also can delete the whole chain at once
+(3 previous redirect records in this example):
+
+```php
+RedirectRule::deleteChainedRecursively('/ten');
+```
+
+Sometimes it's possible that you'll have more than one redirection with
+the same destination. So it's smart to surround code with the try catch
+block, because exception will be raised in this case:
+
+```
+try {
+    RedirectRule::deleteChainedRecursively('/ten');
+} catch (\Exception $e) {
+    // ... handle exception
+}
 ```
