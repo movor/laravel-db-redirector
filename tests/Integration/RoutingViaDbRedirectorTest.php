@@ -21,6 +21,27 @@ class RoutingViaDbRedirectorTest extends TestCase
         $redirectRule->delete();
     }
 
+    public function test_router_misses_non_matching_similar_rule()
+    {
+        $rules = [
+            // 3 segments
+            'one/two/{c}' => 'a',
+            '{a}/two/{c}' => 'b',
+        ];
+
+        foreach ($rules as $origin => $destination) {
+            RedirectRule::create([
+                'origin' => $origin,
+                'destination' => $destination
+            ]);
+        }
+
+        $this->get('/one/two_/X')->assertStatus(404);
+        $this->get('/X/tw_o/Y')->assertStatus(404);
+
+        RedirectRule::truncate();
+    }
+
     public function test_non_default_redirect_status_code()
     {
         $redirectRule = RedirectRule::create([
@@ -115,6 +136,108 @@ class RoutingViaDbRedirectorTest extends TestCase
 
         $this->get('/two')
             ->assertRedirect('/three');
+
+        RedirectRule::truncate();
+    }
+
+    public function test_router_matches_order_for_rules_with_named_params()
+    {
+        // Rules in this array are ordered like the logic
+        // in router works - we'll shuffle them later - just in case
+        $rules = [
+            // 3 segments
+            'one/two/{c}' => 'a',
+            '{a}/two/{c}' => 'b',
+            // 4 segments
+            'one/two/{d}/{e}' => 'c',
+            'one/{b}/three/{d}' => 'd',
+            'one/{b}/{c}/{d}' => 'e',
+            // 6 segments
+            'one/{b}/three/{d}/five/{f}' => 'f',
+            'one/two/{c}/{d}/{e}/{f}' => 'g',
+            'one/{b}/three/{d}/{e}/{f}' => 'h',
+            // 7 segments
+            'one/two/three/four/five/six/{g}' => 'i',
+            '{a}/two/three/four/five/six/{g}' => 'j',
+        ];
+
+        // Shuffle routes to avoid coincidentally
+        // matching (by order in database)
+        uksort($rules, function () {
+            return rand() > rand();
+        });
+
+        foreach ($rules as $origin => $destination) {
+            RedirectRule::create([
+                'origin' => $origin,
+                'destination' => $destination
+            ]);
+        }
+
+        // 3 segments
+        $this->get('one/two/X')->assertRedirect('/a');
+        $this->get('X/two/Y')->assertRedirect('/b');
+
+        // 4 segments
+        $this->get('one/two/X/Y')->assertRedirect('/c');
+        $this->get('one/X/three/Y')->assertRedirect('/d');
+        $this->get('one/X/Y/Z')->assertRedirect('/e');
+
+        // 6 segments
+        $this->get('one/X/three/Y/five/Z')->assertRedirect('/f');
+        $this->get('one/two/X/Y/Z/K')->assertRedirect('/g');
+        $this->get('one/X/three/Y/Z/K')->assertRedirect('/h');
+
+        // 7 segments
+        $this->get('one/two/three/four/five/six/X')->assertRedirect('/i');
+        $this->get('X/two/three/four/five/six/Y')->assertRedirect('/j');
+
+        RedirectRule::truncate();
+    }
+
+    public function test_router_matches_order_for_rules_with_optional_named_params()
+    {
+        // Rules in this array are ordered like the logic
+        // in router works - we'll shuffle them later - just in case
+        $rules = [
+            // 3 segments
+            'one/two/{c?}' => 'a',
+            '{a}/two/{c?}' => 'b',
+            // 6 segments
+            'one/{b}/three/{d?}/five/{f?}' => 'c',
+            'one/two/{c}/{d?}/{e?}/{f?}' => 'd',
+            'one/{b}/three/{d}/{e?}/{f?}' => 'e',
+        ];
+
+        // Shuffle routes to avoid coincidentally
+        // matching (by order in database)
+        uksort($rules, function () {
+            return rand() > rand();
+        });
+
+        foreach ($rules as $origin => $destination) {
+            RedirectRule::create([
+                'origin' => $origin,
+                'destination' => $destination
+            ]);
+        }
+
+        // 3 segments
+        $this->get('one/two')->assertRedirect('/a');
+        $this->get('one/two/X')->assertRedirect('/a');
+
+        $this->get('X/two')->assertRedirect('/b');
+        $this->get('X/two/Y')->assertRedirect('/b');
+
+        // 6 segments
+        $this->get('one/X/three/Y/five')->assertRedirect('/c');
+        $this->get('one/X/three/Y/five/X')->assertRedirect('/c');
+
+        $this->get('one/two/X/Y')->assertRedirect('/d');
+        $this->get('one/two/X/Y/X/K')->assertRedirect('/d');
+
+        $this->get('one/X/three/Y/Z')->assertRedirect('/e');
+        $this->get('one/X/three/Y/Z/K')->assertRedirect('/e');
 
         RedirectRule::truncate();
     }

@@ -27,6 +27,26 @@ class RedirectRule extends Model
     }
 
     /**
+     * Setter for the "origin" attribute
+     *
+     * @param $value
+     */
+    public function setOriginAttribute($value)
+    {
+        $this->attributes['origin'] = trim($value, '/');
+    }
+
+    /**
+     * Setter for the "destination" attribute
+     *
+     * @param $value
+     */
+    public function setDestinationAttribute($value)
+    {
+        $this->attributes['destination'] = trim($value, '/');
+    }
+
+    /**
      * Delete chained redirect with recursive delete
      *
      * @param $destination
@@ -38,6 +58,8 @@ class RedirectRule extends Model
      */
     public static function deleteChainedRecursively($destination)
     {
+        $destination = trim($destination, '/');
+
         $redirectRules = RedirectRule::where('destination', $destination)->get();
 
         if ($redirectRules->count() > 1) {

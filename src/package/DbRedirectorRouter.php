@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Collection;
 use Movor\LaravelDbRedirector\Models\RedirectRule;
 
 class DbRedirectorRouter
@@ -32,8 +33,10 @@ class DbRedirectorRouter
      */
     public function getRedirectFor(Request $request)
     {
-        // Make routes for each record in database
-        RedirectRule::all()->each(function ($redirect) {
+        $potentialRules = $this->getPotentialRules($request->path());
+
+        // Make route for each of potential rules and let Laravel handle the rest
+        $potentialRules->each(function ($redirect) {
             $this->router->get($redirect->origin, function () use ($redirect) {
                 $destination = $this->resolveDestination($redirect->destination);
 
@@ -49,6 +52,72 @@ class DbRedirectorRouter
         } catch (Exception $e) {
             return null;
         }
+    }
+
+    /**
+     * Get potential rules based on requested URI
+     *
+     * @param string $uri
+     *
+     * @return Collection
+     */
+    public function getPotentialRules($uri)
+    {
+        //
+        // Try to match uri with rule without route params
+        //
+
+        $redirectRules = RedirectRule::where('origin', $uri)->get();
+
+        if ($redirectRules->isNotEmpty()) {
+            return $redirectRules;
+        }
+
+        //
+        // Try to match uri with rule with url params:
+        //
+
+        // Search only rules with params but without optional params
+        $query = RedirectRule::where('origin', 'LIKE', '%{%')
+            ->where('origin', 'NOT LIKE', '%?}%');
+
+        // Narrow potential matches by matching number of url segments
+        // (by matching number of slashes)
+        $slashesCount = substr_count($uri, '/');
+        $rawWhere = \DB::raw("LENGTH(origin) - LENGTH(REPLACE(origin, '/', ''))");
+        $query = $query->where($rawWhere, $slashesCount);
+
+        // Ordering
+        $query
+            // Route with lesser number of parameters will have top priority
+            ->orderByRaw("LENGTH(origin) - LENGTH(REPLACE(origin, '{', ''))")
+            // Rules with params nearer end of route will have last priority
+            ->orderByRaw("INSTR(origin, '{') DESC");
+
+        // Get collection of potential rules
+        $potentialRules = $query->get();
+
+        if ($potentialRules->isNotEmpty()) {
+            return $potentialRules;
+        }
+
+        //
+        // Try to match uri with rule with optional url params:
+        //
+
+        // Search only rules with optional params
+        $query = RedirectRule::where('origin', 'LIKE', '%?}%');
+
+        // Ordering
+        $query
+            // Route with less segments will have top priority
+            ->orderByRaw("LENGTH(origin) - LENGTH(REPLACE(origin, '/', ''))")
+            // Route with lesser number of parameters will have next priority
+            ->orderByRaw("LENGTH(origin) - LENGTH(REPLACE(origin, '{', ''))")
+            // Rules with params nearer end of route will have last priority
+            ->orderByRaw("INSTR(origin, '{') DESC");
+
+        return $query->get();
     }
 
     /**
