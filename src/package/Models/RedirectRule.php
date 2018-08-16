@@ -33,7 +33,7 @@ class RedirectRule extends Model
      */
     public function setOriginAttribute($value)
     {
-        $this->attributes['origin'] = trim($value, '/');
+        $this->attributes['origin'] = mb_strtolower(trim($value, '/'));
     }
 
     /**
@@ -43,7 +43,7 @@ class RedirectRule extends Model
      */
     public function setDestinationAttribute($value)
     {
-        $this->attributes['destination'] = trim($value, '/');
+        $this->attributes['destination'] = mb_strtolower(trim($value, '/'));
     }
 
     /**
@@ -58,7 +58,7 @@ class RedirectRule extends Model
      */
     public static function deleteChainedRecursively($destination)
     {
-        $destination = trim($destination, '/');
+        $destination = mb_strtolower(trim($destination, '/'));
 
         $redirectRules = RedirectRule::where('destination', $destination)->get();
 

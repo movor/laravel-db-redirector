@@ -134,6 +134,10 @@ class DbRedirectorRouter
             $destination = str_replace("{{$key}}", $value, $destination);
         }
 
+        // Remove non existent optional params from destination
+        // but after existent params has been resolved
+        $destination = preg_replace('/\/{[\w-_]+}/', '', $destination);
+
         return $destination;
     }
 }

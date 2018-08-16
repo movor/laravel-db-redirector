@@ -24,9 +24,9 @@ class RoutingViaDbRedirectorTest extends TestCase
     public function test_router_misses_non_matching_similar_rule()
     {
         $rules = [
-            // 3 segments
             'one/two/{c}' => 'a',
             '{a}/two/{c}' => 'b',
+            '{a}/two/{c?}' => 'c',
         ];
 
         foreach ($rules as $origin => $destination) {
@@ -38,6 +38,7 @@ class RoutingViaDbRedirectorTest extends TestCase
 
         $this->get('/one/two_/X')->assertStatus(404);
         $this->get('/X/tw_o/Y')->assertStatus(404);
+        $this->get('/X/tw_o/Y/z')->assertStatus(404);
 
         RedirectRule::truncate();
     }
@@ -64,8 +65,8 @@ class RoutingViaDbRedirectorTest extends TestCase
             'destination' => '/three/{a}'
         ]);
 
-        $this->get('/one/a/two')
-            ->assertRedirect('/three/a');
+        $this->get('/one/X/two')
+            ->assertRedirect('/three/X');
 
         $redirectRule->delete();
     }
@@ -77,8 +78,8 @@ class RoutingViaDbRedirectorTest extends TestCase
             'destination' => '/{c}/{b}/{a}/three'
         ]);
 
-        $this->get('/one/a/b/two/c')
-            ->assertRedirect('/c/b/a/three');
+        $this->get('/one/X/Y/two/Z')
+            ->assertRedirect('/Z/Y/X/three');
 
         $redirectRule->delete();
     }
@@ -90,32 +91,27 @@ class RoutingViaDbRedirectorTest extends TestCase
             'destination' => '/three/{a}/four/{b}/{a}-{c}'
         ]);
 
-        $this->get('/one/two/a-b/c')
-            ->assertRedirect('/three/a/four/b/a-c');
+        $this->get('/one/two/X-Y/Z')
+            ->assertRedirect('/three/X/four/Y/X-Z');
 
         $redirectRule->delete();
     }
 
-    public function test_route_can_use_optional_parameters_as_wildcards()
+    public function test_route_can_use_optional_named_parameters()
     {
         $redirectRule = RedirectRule::create([
             'origin' => '/one/{a?}/{b?}',
-            'destination' => '/two'
+            'destination' => '/two/{a}/{b}'
         ]);
 
-        $this->get('/one')
-            ->assertRedirect('/two');
-
-        $this->get('/one/a')
-            ->assertRedirect('/two');
-
-        $this->get('/one/a/b')
-            ->assertRedirect('/two');
+        $this->get('/one/X')->assertRedirect('/two/X');
+        $this->get('/one/X/Y')->assertRedirect('/two/X/Y');
+        $this->get('/one')->assertRedirect('/two');
 
         $redirectRule->delete();
     }
 
-    public function test_router_can_do_chained_redirects()
+    public function test_router_can_perform_chained_redirects()
     {
         RedirectRule::create([
             'origin' => '/one',
@@ -131,11 +127,8 @@ class RoutingViaDbRedirectorTest extends TestCase
         // This is actually working but i'm not sure how to test
         // chained redirects. For now we'll test one by one.
 
-        $this->get('/one')
-            ->assertRedirect('/two');
-
-        $this->get('/two')
-            ->assertRedirect('/three');
+        $this->get('/one')->assertRedirect('/two');
+        $this->get('/two')->assertRedirect('/three');
 
         RedirectRule::truncate();
     }
@@ -143,7 +136,7 @@ class RoutingViaDbRedirectorTest extends TestCase
     public function test_router_matches_order_for_rules_with_named_params()
     {
         // Rules in this array are ordered like the logic
-        // in router works - we'll shuffle them later - just in case
+        // in router works - we'll shuffle them later, just in case
         $rules = [
             // 3 segments
             'one/two/{c}' => 'a',
@@ -198,7 +191,7 @@ class RoutingViaDbRedirectorTest extends TestCase
     public function test_router_matches_order_for_rules_with_optional_named_params()
     {
         // Rules in this array are ordered like the logic
-        // in router works - we'll shuffle them later - just in case
+        // in router works - we'll shuffle them later, just in case
         $rules = [
             // 3 segments
             'one/two/{c?}' => 'a',
@@ -209,7 +202,7 @@ class RoutingViaDbRedirectorTest extends TestCase
             'one/{b}/three/{d}/{e?}/{f?}' => 'e',
         ];
 
-        // Shuffle routes to avoid coincidentally
+        // Shuffle routes to avoid accidentally
         // matching (by order in database)
         uksort($rules, function () {
             return rand() > rand();

@@ -64,4 +64,41 @@ class RedirectRuleModelTest extends TestCase
 
         RedirectRule::truncate();
     }
+
+    public function test_origin_and_destination_are_converted_to_lowercase()
+    {
+        $origin = 'ONE/TWO/THREE';
+        $destination = 'FOUR/FIVE/SEVEN';
+
+        $redirectRule = RedirectRule::create([
+            'origin' => $origin,
+            'destination' => $destination
+        ]);
+
+
+        $redirectRule = RedirectRule::find($redirectRule->id);
+
+        $this->assertEquals(mb_strtolower($origin), $redirectRule->origin);
+        $this->assertEquals(mb_strtolower($destination), $redirectRule->destination);
+
+        $redirectRule->delete();
+    }
+
+    public function test_origin_and_destination_do_not_starts_or_ends_with_slash()
+    {
+        $origin = '/one/two/';
+        $destination = '/three/four/';
+
+        $redirectRule = RedirectRule::create([
+            'origin' => $origin,
+            'destination' => $destination
+        ]);
+
+        $redirectRule = RedirectRule::find($redirectRule->id);
+
+        $this->assertFalse(starts_with($redirectRule->origin, '/'));
+        $this->assertFalse(ends_with($redirectRule->destination, '/'));
+
+        $redirectRule->delete();
+    }
 }
