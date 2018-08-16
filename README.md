@@ -136,9 +136,15 @@ Sometimes it's possible that you'll have more than one redirection with
 the same destination. So it's smart to surround code with the try catch
 block, because exception will be raised in this case:
 
-```
+```php
+RedirectRule::create(['origin' => 'one/two', 'destination' => 'three/four']);
+RedirectRule::create(['origin' => 'three/four', 'destination' => 'five/six']);
+
+// One more with same destination ("five/six") as the previous one.
+RedirectRule::create(['origin' => 'ten/eleven', 'destination' => 'five/six']);
+
 try {
-    RedirectRule::deleteChainedRecursively('/ten');
+    RedirectRule::deleteChainedRecursively('five/six');
 } catch (\Exception $e) {
     // ... handle exception
 }
