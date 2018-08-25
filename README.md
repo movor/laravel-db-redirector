@@ -1,11 +1,16 @@
-# Manage HTTP redirections in Laravel using database
+# Larvel DB redirector
 
 [![Build](https://travis-ci.org/movor/laravel-db-redirector.svg?branch=master)](https://travis-ci.org/movor/laravel-db-redirector)
 [![Downloads](https://poser.pugx.org/movor/laravel-db-redirector/downloads)](https://packagist.org/packages/movor/laravel-db-redirector)
 [![Stable](https://poser.pugx.org/movor/laravel-db-redirector/v/stable)](https://packagist.org/packages/movor/laravel-db-redirector)
 [![License](https://poser.pugx.org/movor/laravel-db-redirector/license)](https://packagist.org/packages/movor/laravel-db-redirector)
 
-***
+### Manage HTTP redirections in Laravel using database
+
+*Manage redirects using database rules. Rules are intended to be very  similar to Laravel default routes, so syntax is pretty easy
+to comprehend.*
+
+---
 
 ## Compatibility
 
@@ -183,4 +188,4 @@ So lets examine our previous case, we have:
 - "/{param}/two/three" => "/five"
 
 In this case both rules have the same number of named params, but in the first rule "{param}" is
-nearer the end of the rule, so it will have priority and we'll and up at "/four".
+nearer the end of the rule, so it will have priority and we'll end up at "/four".
