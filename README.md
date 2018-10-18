@@ -1,4 +1,4 @@
-# Larvel DB redirector
+# Laravel DB redirector
 
 [![Build](https://travis-ci.org/movor/laravel-db-redirector.svg?branch=master)](https://travis-ci.org/movor/laravel-db-redirector)
 [![Downloads](https://poser.pugx.org/movor/laravel-db-redirector/downloads)](https://packagist.org/packages/movor/laravel-db-redirector)
