@@ -7,14 +7,14 @@
 
 ### Manage HTTP redirections in Laravel using database
 
-*Manage redirects using database rules. Rules are intended to be very  similar to Laravel default routes, so syntax is pretty easy
-to comprehend.*
+Manage redirects using database rules. Rules are intended to be very  similar to Laravel default routes, so syntax is pretty easy
+to comprehend.
 
 ---
 
 ## Compatibility
 
-The package is compatible with Laravel versions 5.5.* and 5.6.*
+The package is compatible with Laravel versions `>= 5.1`
 
 ## Installation
 
