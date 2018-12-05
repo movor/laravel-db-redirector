@@ -12,6 +12,19 @@ to comprehend.
 
 ---
 
+:heavy_exclamation_mark::heavy_exclamation_mark::heavy_exclamation_mark:
+**MOVING GIT REPOSITORY**
+:heavy_exclamation_mark::heavy_exclamation_mark::heavy_exclamation_mark:
+
+This package **repo and maintenance will continue on**:
+
+[**vkovic/laravel-db-redirector**](https://github.com/vkovic/laravel-db-redirector).
+
+:truck:  :truck:  :truck:  :truck:  :truck:  :truck:  :truck:  :truck:
+:truck:  :truck:  :truck:  :truck:  :truck:  :truck:  :truck:
+
+---
+
 ## Compatibility
 
 The package is compatible with Laravel versions `>= 5.1`
